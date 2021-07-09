@@ -22,8 +22,11 @@ import com.fis.lms.service.SubscriptionService;
 @RestController
 @RequestMapping("/api")
 public class SubscriptionController {
-	
+
 	Logger logger = LoggerFactory.getLogger(SubscriptionController.class);
+
+	private static final int ADD_COPY = 1;
+	private static final int REDUCE_COPY = -1;
 
 	@Autowired
 	SubscriptionService subscriptionService;
@@ -44,7 +47,7 @@ public class SubscriptionController {
 		String bookId = subscription.getBookId();
 		if (bookProxy.getAvailableCopies(bookId) > 0) {
 			subscription = subscriptionService.addSubscription(subscription);
-			bookProxy.addBook(bookId, -1, (Book) Array.get(bookProxy.getBookbyId(bookId).getBody(), 0));
+			bookProxy.addBook(bookId, REDUCE_COPY, (Book) Array.get(bookProxy.getBookbyId(bookId).getBody(), 0));
 			Subscription[] subscriptionArray = { subscription };
 			return new ResponseEntity<Subscription[]>(subscriptionArray, HttpStatus.CREATED);
 		} else {
@@ -55,7 +58,7 @@ public class SubscriptionController {
 	@PostMapping("/post/returns")
 	public ResponseEntity<Subscription[]> returns(@RequestBody Subscription subscription) {
 		String bookId = subscription.getBookId();
-		bookProxy.addBook(bookId, +1, (Book) Array.get(bookProxy.getBookbyId(bookId).getBody(), 0));
+		bookProxy.addBook(bookId, ADD_COPY, (Book) Array.get(bookProxy.getBookbyId(bookId).getBody(), 0));
 		subscription = subscriptionService.returnBook(subscription);
 		Subscription[] subscriptionArray = { subscription };
 		return new ResponseEntity<Subscription[]>(subscriptionArray, HttpStatus.CREATED);
