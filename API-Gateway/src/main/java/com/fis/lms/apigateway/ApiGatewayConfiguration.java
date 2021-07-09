@@ -10,11 +10,16 @@ public class ApiGatewayConfiguration {
 
 	@Bean
 	public RouteLocator locator(RouteLocatorBuilder builder) {
-		return builder.routes().route(
-				p -> p.path("/books/**").filters(f -> f.rewritePath("/books", "/api/get/books")).uri("lb://Book"))
+		return builder.routes()
+				.route(p -> p.path("/books/**")
+						.filters(f -> f.rewritePath("/books", "/api/get/books"))
+						.uri("lb://Book"))
 				.route(p -> p.path("/subscriptions/**")
 						.filters(f -> f.rewritePath("/subscriptions", "/api/get/subscriptions"))
 						.uri("lb://Subscription"))
+				.route(p -> p.path("/books/**")
+						.filters(f -> f.rewritePath("/books/(?<segment>.*)", "/api/get/books/${segment}"))
+						.uri("lb://Book"))
 				.build();
 	}
 }
