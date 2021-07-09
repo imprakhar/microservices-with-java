@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+
+  book:
+    image: prakharfanse/microservice-lms-app:1.0.0-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8000:8000"
+    networks:
+      - lms-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.DATASOURCE.URL: jdbc:mysql://mysql:3306/ims
+        
+  naming-server:
+    image: prakharfanse/microservice-lms-server:1.0.0-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - lms-network 
+
+  api-gateway:
+    image: prakharfanse/microservice-api-gateway:1.0.0-SNAPSHOT
+    ports:
+        - "8756:8756"
+    networks:
+      - lms-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  subscription:
+    image: docker.io/prakharfanse/microservice-lms-app-subscription:1.0.0-SNAPSHOT
+    ports:
+        - "8081:8081"
+    networks:
+      - lms-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.DATASOURCE.URL: jdbc:mysql://mysql:3306/ims
+
+networks:
+  lms-network:
